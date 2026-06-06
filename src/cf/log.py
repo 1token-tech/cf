@@ -9,10 +9,18 @@ from pathlib import Path
 
 from loguru import logger as global_logger
 
-# 日志格式: INFO [13:30:28.370][file.py:86] message
+# 日志格式: INFO  [13:30:28.370] message
+# 把 WARNING/CRITICAL 缩短到 4 字符，其他 level（DEBUG/INFO/ERROR）保持原名，统一按 5 字符左对齐
+_SHORT_LEVEL = {"WARNING": "WARN", "CRITICAL": "CRIT"}
+
+
+def _patch_short_level(record):
+    record["extra"]["lvl"] = _SHORT_LEVEL.get(record["level"].name, record["level"].name)
+
+
 _LOG_FORMAT = (
-    "<level>{level:5}</level> "
-    "<dim>[{time:HH:mm:ss.SSS}][{file.name}:{line}]</dim> "
+    "<level>{extra[lvl]:<5}</level> "
+    "<dim>[{time:HH:mm:ss.SSS}]</dim> "
     "<level>{message}</level>"
 )
 
@@ -72,8 +80,8 @@ def _formatter(record) -> str:
     return "{extra[serialized]}\n"
 
 
-# 创建 logger 实例
-logger = global_logger.bind(name="cf")
+# 创建 logger 实例，patcher 写入短 level 名到 extra.lvl
+logger = global_logger.bind(name="cf").patch(_patch_short_level)
 
 # 初始化 logger 配置
 logger.remove()
