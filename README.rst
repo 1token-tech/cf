@@ -6,8 +6,8 @@ cf
 .. image:: https://img.shields.io/pypi/v/cf.svg
         :target: https://pypi.python.org/pypi/cf
 
-.. image:: https://img.shields.io/travis/tangyouze/cf.svg
-        :target: https://travis-ci.com/tangyouze/cf
+.. image:: https://github.com/1token-tech/cf/actions/workflows/ci.yml/badge.svg
+        :target: https://github.com/1token-tech/cf/actions/workflows/ci.yml
 
 .. image:: https://readthedocs.org/projects/cf/badge/?version=latest
         :target: https://cf.readthedocs.io/en/latest/?version=latest

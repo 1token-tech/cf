@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12', '3.13']
+    runs-on: [self-hosted, hetzner, general]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: 1token-tech/setup-uv@v0.3.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Lint (ruff check)
+        run: uv run ruff check src/
+      - name: Format check (ruff format)
+        run: uv run ruff format --check src/
+      - name: Type check (mypy)
+        run: uv run mypy src/cf/
+      - name: Test (pytest)
+        run: uv run pytest -v
