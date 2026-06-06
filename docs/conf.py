@@ -47,8 +47,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'cf'
-copyright = "2025, cf"
-author = "cf"
+copyright = "2025, 1Token"
+author = "1Token"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout
@@ -129,7 +129,7 @@ latex_elements = {
 latex_documents = [
     (master_doc, 'cf.tex',
      'cf Documentation',
-     'cf', 'manual'),
+     '1Token', 'manual'),
 ]
 
 

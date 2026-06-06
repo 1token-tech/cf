@@ -5,7 +5,7 @@ Credits
 Development Lead
 ----------------
 
-* cf <tyz@1token.trade>
+* 1Token <tyz@1token.trade>
 
 Contributors
 ------------

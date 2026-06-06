@@ -6,7 +6,7 @@ readme = "README.rst"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "tyz", email = "tyz@1token.trade"}
+    {name = "1Token", email = "tyz@1token.trade"}
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -34,10 +34,10 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/tangyouze/cf"
-Repository = "https://github.com/tangyouze/cf"
-Issues = "https://github.com/tangyouze/cf/issues"
-Changelog = "https://github.com/tangyouze/cf/blob/master/HISTORY.rst"
+Homepage = "https://github.com/1token-tech/cf"
+Repository = "https://github.com/1token-tech/cf"
+Issues = "https://github.com/1token-tech/cf/issues"
+Changelog = "https://github.com/1token-tech/cf/blob/master/HISTORY.rst"
 
 [build-system]
 requires = ["hatchling"]

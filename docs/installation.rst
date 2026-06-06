@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/tangyouze/cf
+    $ git clone git://github.com/1token-tech/cf
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/tangyouze/cf/tarball/master
+    $ curl -OJL https://github.com/1token-tech/cf/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/tangyouze/cf
-.. _tarball: https://github.com/tangyouze/cf/tarball/master
+.. _Github repo: https://github.com/1token-tech/cf
+.. _tarball: https://github.com/1token-tech/cf/tarball/master
