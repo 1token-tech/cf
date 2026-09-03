@@ -1,8 +1,15 @@
-"""Tests for `cf.log` —— 重点是业务 extra 字段不能被静默丢弃。"""
+"""Tests for `cf.log` —— 重点是业务 extra 字段不能被静默丢弃，以及日志不能吐局部变量。"""
 
 import json
 
-from cf.log import _business_extra, _json_serialize, _patch_record
+from cf.log import (
+    _business_extra,
+    _json_serialize,
+    _patch_record,
+    format_without_exception,
+    logger,
+    set_log_level,
+)
 
 
 def _make_record(extra: dict, message: str = "something happened", level: str = "WARNING") -> dict:
@@ -134,3 +141,42 @@ class TestJsonSerialize:
         payload = json.loads(_json_serialize(record))
 
         assert "obj" in payload["extra"]
+
+
+def _raise_with_local_secret():
+    dsn = "postgresql://aioa:hunter2-secret@db.example/aioa"
+    # 报错行必须引用 dsn：diagnose 只渲染当前行用到的变量，否则测试分辨不出开关
+    raise RuntimeError("connect failed for " + dsn.split("@")[-1])
+
+
+class TestNoLocalVariableLeak:
+    """2026-09-03 事故：asyncpg 连库超时，loguru diagnose 把 dsn 和密码渲染进 traceback，
+    经 Sentry 邮件外发。日志任何一路都不许出现局部变量的值。"""
+
+    def test_stdout_sink_does_not_render_locals(self, capsys):
+        set_log_level("DEBUG")
+        try:
+            _raise_with_local_secret()
+        except RuntimeError:
+            logger.exception("tick error")
+
+        out = capsys.readouterr().out
+        assert "tick error" in out
+        assert "connect failed" in out
+        assert "hunter2-secret" not in out
+
+    def test_format_without_exception_keeps_prefix_and_drops_traceback(self):
+        """第三方 sink 走这个回调：消息前缀照旧，traceback 整个不进消息"""
+        lines: list[str] = []
+        handler_id = logger.add(lines.append, format=format_without_exception, level="ERROR")
+        try:
+            _raise_with_local_secret()
+        except RuntimeError:
+            logger.exception("tick error")
+        logger.remove(handler_id)
+
+        assert len(lines) == 1
+        assert "| ERROR    |" in lines[0]
+        assert lines[0].rstrip("\n").endswith("- tick error")
+        assert "Traceback" not in lines[0]
+        assert "hunter2-secret" not in lines[0]
