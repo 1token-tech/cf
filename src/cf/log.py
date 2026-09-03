@@ -120,14 +120,28 @@ def _formatter(record) -> str:
     return "{extra[serialized]}\n"
 
 
+def format_without_exception(record) -> str:
+    """给第三方 sink（典型是 sentry-sdk 的 LoguruIntegration）用的 format 回调。
+
+    loguru 对字符串 format 会自动追加 ``\\n{exception}``，把 traceback 渲染进消息正文；
+    而 loguru 自己不管的 sink 又是 diagnose 默认开——traceback 里每一帧的局部变量值
+    （数据库 dsn、密码、token）全跟着进了消息。回调形式的 format 不会被追加 ``{exception}``，
+    异常本体留给 sink 自己从 record 里拿（sentry 会拿去生成结构化 stacktrace）。
+    格式沿用 loguru 默认的前缀，Sentry 上事件标题不变。
+    """
+    return "{time:YYYY-MM-DD HH:mm:ss.SSS} | {level: <8} | {name}:{function}:{line} - {message}\n"
+
+
 # 创建 logger 实例，patcher 写入短 level 名与业务上下文到 extra.lvl / extra.ctx
 logger = global_logger.bind(name="cf").patch(_patch_record)
 
 # 初始化 logger 配置
+# diagnose 一律关：开着会把 traceback 每一帧的局部变量值打进日志（dsn、密码、token），
+# 生产日志 / Sentry 都出过泄露；backtrace 保留，只多帧不多值
 logger.remove()
 logger.level("DEBUG", color="<dim>")
 logger.level("WARNING", color="<red>")
-logger.add(sink=sys.stdout, format=_LOG_FORMAT, level="DEBUG")
+logger.add(sink=sys.stdout, format=_LOG_FORMAT, level="DEBUG", diagnose=False)
 
 
 @lru_cache(maxsize=1)
@@ -139,10 +153,11 @@ def logger_add_path():
         rotation="10 MB",
         retention="7 days",
         format=_formatter,
+        diagnose=False,
     )
 
 
 def set_log_level(level: str):
     """设置日志级别"""
     logger.remove()
-    logger.add(sink=sys.stdout, format=_LOG_FORMAT, level=level)
+    logger.add(sink=sys.stdout, format=_LOG_FORMAT, level=level, diagnose=False)
